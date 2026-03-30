@@ -1,0 +1,33 @@
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.rank {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.user {
+  color: #30343f;
+}
+
+.score {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #2251ff;
+}
+
+.empty,
+.loading {
+  text-align: center;
+  color: #8a919f;
+  margin-top: 20rpx;
+}

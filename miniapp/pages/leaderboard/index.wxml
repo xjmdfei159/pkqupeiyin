@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="card">
+    <view class="title">视频 {{videoId}} 排行榜</view>
+    <view class="subtitle">按用户历史最高分排序</view>
+  </view>
+
+  <block wx:for="{{items}}" wx:key="user_id">
+    <view class="card rank-row">
+      <view class="left">
+        <view class="rank">#{{index + 1}}</view>
+        <view class="user">{{item.user_id}}</view>
+      </view>
+      <view class="score">{{item.best_score}}</view>
+    </view>
+  </block>
+
+  <view wx:if="{{!items.length && !loading}}" class="empty">暂无数据，去试试配音吧</view>
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+</view>

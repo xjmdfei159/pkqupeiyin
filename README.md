@@ -16,6 +16,7 @@
 - `docs/mvp-design.md`：产品与技术设计说明
 - `app/main.py`：FastAPI 应用与业务逻辑
 - `tests/test_api.py`：接口测试
+- `miniapp/`：微信小程序前端 MVP（页面与 API 调用示例）
 - `requirements.txt`：依赖列表
 
 ## 快速启动
@@ -40,6 +41,35 @@ uvicorn app.main:app --reload
 - `POST /dubbings/submit`：提交配音并评分
 - `POST /pk/invitations`：创建 PK 邀请
 - `POST /pk/invitations/{share_code}/join`：通过分享码加入 PK
+
+## 微信小程序前端（MVP）
+
+### 1) 导入项目
+
+使用微信开发者工具导入 `miniapp/` 目录。
+
+> `miniapp/project.config.json` 已提供开发配置，默认 `appid` 为 `touristappid`（仅示例）。
+
+### 2) 配置后端地址
+
+编辑 `miniapp/app.js`：
+
+```js
+App({
+  globalData: {
+    baseUrl: 'http://127.0.0.1:8000'
+  }
+});
+```
+
+如果你在真机调试，需要改为可访问的后端地址（如内网穿透地址）。
+
+### 3) 页面说明
+
+- `pages/videos/index`：视频列表入口
+- `pages/video-detail/index`：配音输入与提交评分、发起 PK 邀请
+- `pages/leaderboard/index`：排行榜
+- `pages/pk-join/index`：通过分享码加入 PK
 
 ## 运行测试
 

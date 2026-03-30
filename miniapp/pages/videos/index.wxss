@@ -1,0 +1,29 @@
+.user-box .label {
+  color: #5c6370;
+  font-size: 24rpx;
+}
+
+.user-box .user-id {
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.user-box .tip {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a919f;
+}
+
+.meta {
+  margin-top: 12rpx;
+  color: #5c6370;
+  font-size: 24rpx;
+}
+
+.loading {
+  text-align: center;
+  color: #8a919f;
+  padding: 24rpx 0;
+}

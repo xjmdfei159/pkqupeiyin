@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="card" wx:if="{{video.video_id}}">
+    <view class="title">{{video.title}}</view>
+    <view class="subtitle">{{video.description}}</view>
+    <view class="video-id">video_id: {{video.video_id}}</view>
+    <view class="btn-row">
+      <button size="mini" bindtap="goLeaderboard">看排行榜</button>
+      <button size="mini" type="primary" bindtap="createInvitation">发起PK邀请</button>
+    </view>
+  </view>
+
+  <view class="card" wx:for="{{lines}}" wx:key="line_id">
+    <view class="line-head">第 {{index + 1}} 句</view>
+    <view class="expected">标准词：{{item.expected_text}}</view>
+    <textarea
+      class="input"
+      placeholder="输入该句配音识别文本（MVP模拟）"
+      value="{{item.spoken_text}}"
+      data-line-id="{{item.line_id}}"
+      bindinput="onLineInput"
+    />
+  </view>
+
+  <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
+
+  <view class="card" wx:if="{{result.attempt_id}}">
+    <view class="result-title">本次结果</view>
+    <view>总分：{{result.total_score}}</view>
+    <view>当前排名：{{result.current_rank || '-'}}</view>
+    <view>是否刷新个人最佳：{{result.is_new_personal_best ? '是' : '否'}}</view>
+
+    <view class="line-score-title">逐句得分</view>
+    <block wx:for="{{result.line_results}}" wx:key="line_id">
+      <view class="line-score-row">
+        <text>{{item.line_id}}：</text>
+        <text>{{item.score}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="card" wx:if="{{invite.share_code}}">
+    <view class="result-title">PK邀请已创建</view>
+    <view>分享码：{{invite.share_code}}</view>
+    <view>参与者：{{invite.participants.join('、')}}</view>
+    <view class="tip">可让好友打开：/pages/pk-join/index?shareCode={{invite.share_code}}</view>
+  </view>
+</view>

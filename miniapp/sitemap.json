@@ -1,0 +1,9 @@
+{
+  "desc": "配音PK小程序站点地图",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

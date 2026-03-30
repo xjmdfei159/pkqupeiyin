@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="card user-box">
+    <view class="label">当前用户ID</view>
+    <view class="user-id">{{userId}}</view>
+    <view class="tip">可在 utils/user.js 调整用户生成逻辑</view>
+  </view>
+
+  <block wx:for="{{videos}}" wx:key="video_id">
+    <view class="card">
+      <view class="title">{{item.title}}</view>
+      <view class="subtitle">{{item.description}}</view>
+      <view class="meta">字幕句数：{{item.subtitles.length}}</view>
+      <view class="btn-row">
+        <button size="mini" type="primary" data-video-id="{{item.video_id}}" bindtap="goDetail">去配音</button>
+        <button size="mini" data-video-id="{{item.video_id}}" bindtap="goLeaderboard">排行榜</button>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+</view>
