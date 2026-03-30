@@ -16,6 +16,25 @@
   color: #8a919f;
 }
 
+.config-box .label {
+  color: #5c6370;
+  font-size: 24rpx;
+}
+
+.base-url-input {
+  margin-top: 10rpx;
+  border-radius: 12rpx;
+  background: #f5f7fa;
+  padding: 16rpx;
+  font-size: 24rpx;
+}
+
+.tip {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a919f;
+}
+
 .meta {
   margin-top: 12rpx;
   color: #5c6370;

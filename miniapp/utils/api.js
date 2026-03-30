@@ -1,7 +1,15 @@
 const app = getApp();
 
-function request({ url, method = 'GET', data }) {
+function getBaseUrlOrThrow() {
   const baseUrl = (app && app.globalData && app.globalData.baseUrl) || '';
+  if (!baseUrl) {
+    throw new Error('请先在视频页配置后端地址');
+  }
+  return String(baseUrl).trim().replace(/\/+$/, '');
+}
+
+function request({ url, method = 'GET', data }) {
+  const baseUrl = getBaseUrlOrThrow();
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${baseUrl}${url}`,
@@ -17,13 +25,18 @@ function request({ url, method = 'GET', data }) {
         }
         reject(new Error(res.data && res.data.detail ? res.data.detail : '请求失败'));
       },
-      fail: (err) => reject(err)
+      fail: () =>
+        reject(
+          new Error(
+            '网络不可达，请检查后端地址、HTTPS证书或微信业务域名配置'
+          )
+        )
     });
   });
 }
 
 function uploadAudioLine({ userId, videoId, lineId, filePath }) {
-  const baseUrl = (app && app.globalData && app.globalData.baseUrl) || '';
+  const baseUrl = getBaseUrlOrThrow();
   return new Promise((resolve, reject) => {
     wx.uploadFile({
       url: `${baseUrl}/dubbings/audio-lines/upload`,
@@ -51,7 +64,12 @@ function uploadAudioLine({ userId, videoId, lineId, filePath }) {
           reject(new Error('上传失败'));
         }
       },
-      fail: (err) => reject(err)
+      fail: () =>
+        reject(
+          new Error(
+            '上传失败，请检查后端地址、HTTPS证书或微信业务域名配置'
+          )
+        )
     });
   });
 }

@@ -52,19 +52,16 @@ uvicorn app.main:app --reload
 
 > `miniapp/project.config.json` 已提供开发配置，默认 `appid` 为 `touristappid`（仅示例）。
 
-### 2) 配置后端地址
+### 2) 配置后端地址（重点）
 
-编辑 `miniapp/app.js`：
+现在支持在小程序首页直接配置后端地址，无需改代码：
 
-```js
-App({
-  globalData: {
-    baseUrl: 'http://127.0.0.1:8000'
-  }
-});
-```
+- 进入 `pages/videos/index`（视频列表页）
+- 在“后端地址”输入框填写后端地址
+- 点击“保存地址”并点“检测连接”
 
-如果你在真机调试，需要改为可访问的后端地址（如内网穿透地址）。
+> 真机调试必须使用 **公网可访问 HTTPS 地址**，`http://127.0.0.1:8000` 在手机上不可达。  
+> 同时请在微信公众平台的小程序后台把该域名加入 **request/uploadFile 合法域名**。
 
 ### 3) 页面说明
 

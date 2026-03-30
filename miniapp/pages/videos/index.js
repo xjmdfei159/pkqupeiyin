@@ -1,11 +1,25 @@
 const api = require('../../utils/api');
 const { getOrCreateUserId } = require('../../utils/user');
+const app = getApp();
+
+const BASE_URL_KEY = 'pk_base_url';
+
+function normalizeBaseUrl(url) {
+  return String(url || '').trim().replace(/\/+$/, '');
+}
 
 Page({
   data: {
     userId: '',
     videos: [],
-    loading: false
+    loading: false,
+    baseUrlInput: '',
+    healthStatus: ''
+  },
+
+  onLoad() {
+    const savedBaseUrl = wx.getStorageSync(BASE_URL_KEY) || app.globalData.baseUrl || '';
+    this.setData({ baseUrlInput: savedBaseUrl });
   },
 
   onShow() {
@@ -37,5 +51,56 @@ Page({
     wx.navigateTo({
       url: `/pages/leaderboard/index?videoId=${videoId}`
     });
+  },
+
+  onBaseUrlInput(e) {
+    this.setData({ baseUrlInput: e.detail.value || '' });
+  },
+
+  saveBaseUrl() {
+    const normalized = normalizeBaseUrl(this.data.baseUrlInput);
+    if (!normalized) {
+      wx.showToast({ title: '请输入后端地址', icon: 'none' });
+      return;
+    }
+    app.globalData.baseUrl = normalized;
+    wx.setStorageSync(BASE_URL_KEY, normalized);
+    wx.showToast({ title: '后端地址已保存', icon: 'success' });
+  },
+
+  async testConnection() {
+    const normalized = normalizeBaseUrl(this.data.baseUrlInput);
+    if (!normalized) {
+      wx.showToast({ title: '请先填写后端地址', icon: 'none' });
+      return;
+    }
+    app.globalData.baseUrl = normalized;
+    wx.setStorageSync(BASE_URL_KEY, normalized);
+    this.setData({ healthStatus: '检测中...' });
+    try {
+      await new Promise((resolve, reject) => {
+        wx.request({
+          url: `${normalized}/health`,
+          timeout: 8000,
+          success: (res) => {
+            if (res.statusCode === 200 && res.data && res.data.status === 'ok') {
+              resolve(res.data);
+              return;
+            }
+            reject(new Error('健康检查未通过'));
+          },
+          fail: () => reject(new Error('网络不可达'))
+        });
+      });
+      this.setData({ healthStatus: '连接成功' });
+      wx.showToast({ title: '连接成功', icon: 'success' });
+      this.fetchVideos();
+    } catch (error) {
+      this.setData({ healthStatus: '连接失败' });
+      wx.showToast({
+        title: '连接失败：请检查HTTPS与业务域名',
+        icon: 'none'
+      });
+    }
   }
 });
