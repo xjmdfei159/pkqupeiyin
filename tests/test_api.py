@@ -115,3 +115,32 @@ def test_audio_line_upload_rejects_empty_file() -> None:
     )
     assert response.status_code == 400
     assert response.json()["detail"] == "Audio file is empty"
+
+
+def test_render_requires_uploaded_lines() -> None:
+    response = client.post(
+        "/dubbings/render",
+        json={"user_id": "u_render_no_audio", "video_id": "video_001"},
+    )
+    assert response.status_code == 400
+    assert "No uploaded audio lines" in response.json()["detail"]
+
+
+def test_render_returns_400_when_lines_incomplete() -> None:
+    upload_response = client.post(
+        "/dubbings/audio-lines/upload",
+        data={
+            "user_id": "u_render_partial",
+            "video_id": "video_001",
+            "line_id": "l1",
+        },
+        files={"audio_file": ("line1.wav", b"abc123", "audio/wav")},
+    )
+    assert upload_response.status_code == 200
+
+    render_response = client.post(
+        "/dubbings/render",
+        json={"user_id": "u_render_partial", "video_id": "video_001"},
+    )
+    assert render_response.status_code == 400
+    assert "Missing uploaded lines" in render_response.json()["detail"]

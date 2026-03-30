@@ -3,11 +3,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
+from pathlib import Path
+import subprocess
 from threading import Lock
 from typing import Dict, List
+from urllib import request as urlrequest
 from uuid import uuid4
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 
@@ -70,7 +74,17 @@ class AudioLineUploadStore:
     line_id: str
     file_name: str
     file_size: int
+    file_path: str
     transcript: str
+    created_at: datetime
+
+
+@dataclass
+class RenderedVideoStore:
+    render_id: str
+    user_id: str
+    video_id: str
+    output_path: str
     created_at: datetime
 
 
@@ -94,6 +108,11 @@ class JoinInvitationRequest(BaseModel):
     user_id: str = Field(min_length=1)
 
 
+class RenderVideoRequest(BaseModel):
+    user_id: str = Field(min_length=1)
+    video_id: str = Field(min_length=1)
+
+
 class InMemoryStore:
     def __init__(self) -> None:
         self.videos: Dict[str, Video] = self._seed_videos()
@@ -101,6 +120,7 @@ class InMemoryStore:
         self.leaderboard: Dict[tuple[str, str], LeaderboardEntryStore] = {}
         self.invitations: Dict[str, PkInvitationStore] = {}
         self.audio_line_uploads: Dict[str, AudioLineUploadStore] = {}
+        self.rendered_videos: Dict[str, RenderedVideoStore] = {}
         self.lock = Lock()
 
     @staticmethod
@@ -163,6 +183,176 @@ app = FastAPI(
     description="支持配音评分、PK 邀请、视频排行榜的最小可用后端。",
     version="0.1.0",
 )
+
+ARTIFACTS_DIR = Path(__file__).resolve().parent.parent / "_artifacts"
+AUDIO_UPLOAD_DIR = ARTIFACTS_DIR / "audio_uploads"
+VIDEO_CACHE_DIR = ARTIFACTS_DIR / "video_cache"
+RENDERED_VIDEO_DIR = ARTIFACTS_DIR / "rendered_videos"
+
+
+def ensure_artifact_dirs() -> None:
+    AUDIO_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    VIDEO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    RENDERED_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+
+
+ensure_artifact_dirs()
+
+
+def ensure_ffmpeg_available() -> None:
+    try:
+        subprocess.run(
+            ["ffmpeg", "-version"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="ffmpeg is not available on server",
+        ) from exc
+
+
+def download_if_needed(url: str, target_path: Path) -> Path:
+    if target_path.exists():
+        return target_path
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    urlrequest.urlretrieve(url, target_path)  # nosec B310, MVP sample usage
+    return target_path
+
+
+def run_ffmpeg_command(command: List[str]) -> None:
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as exc:
+        error_message = exc.stderr.strip() or "ffmpeg command failed"
+        raise HTTPException(status_code=500, detail=error_message) from exc
+
+
+def probe_video_duration_seconds(video_path: Path) -> float:
+    try:
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(video_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return max(float(result.stdout.strip()), 0.1)
+    except (subprocess.CalledProcessError, ValueError) as exc:
+        raise HTTPException(status_code=500, detail="failed to probe video duration") from exc
+
+
+def render_user_dubbing_video(user_id: str, video: Video, render_id: str) -> Path:
+    ensure_ffmpeg_available()
+
+    user_uploads = [
+        upload
+        for upload in store.audio_line_uploads.values()
+        if upload.user_id == user_id and upload.video_id == video.video_id
+    ]
+    if not user_uploads:
+        raise HTTPException(status_code=400, detail="No uploaded audio lines for this user/video")
+
+    latest_by_line: Dict[str, AudioLineUploadStore] = {}
+    for upload in user_uploads:
+        prev = latest_by_line.get(upload.line_id)
+        if prev is None or upload.created_at > prev.created_at:
+            latest_by_line[upload.line_id] = upload
+
+    missing_lines = [
+        subtitle.line_id
+        for subtitle in video.subtitles
+        if subtitle.line_id not in latest_by_line
+    ]
+    if missing_lines:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing uploaded lines: {', '.join(missing_lines)}",
+        )
+
+    source_video_path = VIDEO_CACHE_DIR / f"{video.video_id}.mp4"
+    try:
+        if video.demo_video_url.startswith(("http://", "https://", "file://")):
+            source_video_path = download_if_needed(video.demo_video_url, source_video_path)
+        else:
+            local_path = Path(video.demo_video_url)
+            if not local_path.exists():
+                raise FileNotFoundError(local_path)
+            source_video_path = local_path
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail="failed to fetch source video") from exc
+
+    video_duration = probe_video_duration_seconds(source_video_path)
+    output_path = RENDERED_VIDEO_DIR / f"{render_id}.mp4"
+
+    audio_input_paths: List[Path] = []
+    for subtitle in video.subtitles:
+        upload = latest_by_line[subtitle.line_id]
+        upload_path = Path(upload.file_path)
+        if not upload_path.exists():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Audio file missing for line {subtitle.line_id}",
+            )
+        audio_input_paths.append(upload_path)
+
+    ffmpeg_command = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(source_video_path),
+        "-f",
+        "lavfi",
+        "-t",
+        f"{video_duration:.3f}",
+        "-i",
+        "anullsrc=r=16000:cl=mono",
+    ]
+    for audio_path in audio_input_paths:
+        ffmpeg_command.extend(["-i", str(audio_path)])
+
+    filter_parts: List[str] = ["[1:a]volume=1[a0]"]
+    mix_labels = ["[a0]"]
+    for index, subtitle in enumerate(video.subtitles, start=2):
+        delay_ms = max(subtitle.start_ms, 0)
+        label = f"a{index - 1}"
+        filter_parts.append(
+            f"[{index}:a]adelay={delay_ms}|{delay_ms},volume=1[{label}]"
+        )
+        mix_labels.append(f"[{label}]")
+
+    filter_parts.append(
+        f"{''.join(mix_labels)}amix=inputs={len(mix_labels)}:normalize=0[mix]"
+    )
+    ffmpeg_command.extend(
+        [
+            "-filter_complex",
+            ";".join(filter_parts),
+            "-map",
+            "0:v:0",
+            "-map",
+            "[mix]",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-movflags",
+            "+faststart",
+            str(output_path),
+        ]
+    )
+    run_ffmpeg_command(ffmpeg_command)
+    return output_path
 
 
 def compute_line_score(expected_text: str, spoken_text: str) -> float:
@@ -367,6 +557,11 @@ async def upload_audio_line(
     upload_id = str(uuid4())
 
     file_name = audio_file.filename or "unknown_audio"
+    line_upload_dir = AUDIO_UPLOAD_DIR / user_id / video_id
+    line_upload_dir.mkdir(parents=True, exist_ok=True)
+    extension = Path(file_name).suffix or ".mp3"
+    file_path = line_upload_dir / f"{line_id}_{upload_id}{extension}"
+    file_path.write_bytes(content)
 
     with store.lock:
         store.audio_line_uploads[upload_id] = AudioLineUploadStore(
@@ -376,6 +571,7 @@ async def upload_audio_line(
             line_id=line_id,
             file_name=file_name,
             file_size=len(content),
+            file_path=str(file_path),
             transcript=transcript,
             created_at=created_at,
         )
@@ -391,6 +587,51 @@ async def upload_audio_line(
         "line_score": line_score,
         "created_at": created_at.isoformat(),
     }
+
+
+@app.post("/dubbings/render")
+def render_dubbing_video(payload: RenderVideoRequest) -> dict:
+    video = store.videos.get(payload.video_id)
+    if video is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    render_id = str(uuid4())
+    output_path = render_user_dubbing_video(payload.user_id, video, render_id)
+    created_at = utc_now()
+
+    with store.lock:
+        store.rendered_videos[render_id] = RenderedVideoStore(
+            render_id=render_id,
+            user_id=payload.user_id,
+            video_id=payload.video_id,
+            output_path=str(output_path),
+            created_at=created_at,
+        )
+
+    return {
+        "render_id": render_id,
+        "video_id": payload.video_id,
+        "user_id": payload.user_id,
+        "download_url": f"/dubbings/render/{render_id}/download",
+        "created_at": created_at.isoformat(),
+    }
+
+
+@app.get("/dubbings/render/{render_id}/download")
+def download_rendered_video(render_id: str) -> FileResponse:
+    rendered = store.rendered_videos.get(render_id)
+    if rendered is None:
+        raise HTTPException(status_code=404, detail="Rendered video not found")
+
+    output_path = Path(rendered.output_path)
+    if not output_path.exists():
+        raise HTTPException(status_code=404, detail="Rendered video file missing")
+
+    return FileResponse(
+        path=output_path,
+        media_type="video/mp4",
+        filename=f"{render_id}.mp4",
+    )
 
 
 @app.post("/pk/invitations")

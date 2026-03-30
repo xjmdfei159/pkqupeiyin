@@ -8,6 +8,11 @@ function getBaseUrlOrThrow() {
   return String(baseUrl).trim().replace(/\/+$/, '');
 }
 
+function getBaseUrl() {
+  const baseUrl = (app && app.globalData && app.globalData.baseUrl) || '';
+  return String(baseUrl).trim().replace(/\/+$/, '');
+}
+
 function request({ url, method = 'GET', data }) {
   const baseUrl = getBaseUrlOrThrow();
   return new Promise((resolve, reject) => {
@@ -116,12 +121,34 @@ function getPkInvitation(shareCode) {
   });
 }
 
+function renderDubbingVideo(payload) {
+  return request({
+    url: '/dubbings/render',
+    method: 'POST',
+    data: payload
+  });
+}
+
+function buildAbsoluteUrl(path) {
+  const baseUrl = getBaseUrlOrThrow();
+  if (!path) {
+    return baseUrl;
+  }
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `${baseUrl}${path}`;
+}
+
 module.exports = {
   getVideos,
   getVideo,
   getLeaderboard,
   submitDubbing,
   uploadAudioLine,
+  renderDubbingVideo,
+  buildAbsoluteUrl,
+  getBaseUrl,
   createPkInvitation,
   getPkInvitation,
   joinPkInvitation

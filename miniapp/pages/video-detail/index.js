@@ -10,6 +10,8 @@ Page({
     result: {},
     invite: {},
     submitting: false,
+    rendering: false,
+    renderedVideoUrl: '',
     recordingLineId: '',
     recorderReady: false
   },
@@ -163,6 +165,31 @@ Page({
       wx.showToast({ title: error.message || '提交失败', icon: 'none' });
     } finally {
       this.setData({ submitting: false });
+    }
+  },
+
+  async renderVideo() {
+    const missing = this.data.lines.filter((line) => !line.audio_uploaded);
+    if (missing.length) {
+      wx.showToast({ title: '请先完成每句录音上传', icon: 'none' });
+      return;
+    }
+
+    this.setData({ rendering: true });
+    wx.showLoading({ title: '合成中...' });
+    try {
+      const rendered = await api.renderDubbingVideo({
+        user_id: this.data.userId,
+        video_id: this.data.videoId
+      });
+      const downloadUrl = api.buildAbsoluteUrl(rendered.download_url);
+      this.setData({ renderedVideoUrl: downloadUrl });
+      wx.showToast({ title: '合成完成', icon: 'success' });
+    } catch (error) {
+      wx.showToast({ title: error.message || '合成失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+      this.setData({ rendering: false });
     }
   },
 

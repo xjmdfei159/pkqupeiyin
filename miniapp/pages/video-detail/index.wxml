@@ -53,6 +53,7 @@
 
   <view class="submit-wrap">
     <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
+    <button class="render-btn" bindtap="renderVideo" loading="{{rendering}}">合成配音视频</button>
   </view>
 
   <view class="result-card" wx:if="{{result.attempt_id}}">
@@ -60,5 +61,11 @@
     <view>总分：{{result.total_score}}</view>
     <view>当前排名：{{result.current_rank || '-'}}</view>
     <view>是否刷新个人最佳：{{result.is_new_personal_best ? '是' : '否'}}</view>
+  </view>
+
+  <view class="result-card" wx:if="{{renderedVideoUrl}}">
+    <view class="result-title">合成视频预览</view>
+    <video class="rendered-video" src="{{renderedVideoUrl}}" controls></video>
+    <view class="line-transcript">下载链接：{{renderedVideoUrl}}</view>
   </view>
 </view>

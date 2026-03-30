@@ -40,6 +40,8 @@ uvicorn app.main:app --reload
 - `GET /videos/{video_id}/leaderboard`：视频排行榜
 - `POST /dubbings/audio-lines/upload`：上传单句录音，返回模拟 ASR 文本与单句分数
 - `POST /dubbings/submit`：提交配音并评分
+- `POST /dubbings/render`：合成用户当前视频的配音成片
+- `GET /dubbings/render/{render_id}/download`：下载合成后视频
 - `POST /pk/invitations`：创建 PK 邀请
 - `GET /pk/invitations/{share_code}`：查询邀请码详情（用于分享落地页展示）
 - `POST /pk/invitations/{share_code}/join`：通过分享码加入 PK
@@ -81,6 +83,43 @@ uvicorn app.main:app --reload
 - 在配音页点击“发起PK”可生成分享码；
 - 点击“分享PK”可使用微信原生转发，把挑战发给好友或群；
 - 被分享者打开后进入 `pages/pk-join/index?shareCode=...`，可直接查看邀请并加入 PK。
+
+### 6) 配音视频合成（MVP）
+
+- 在配音页完成每句录音上传后，点击“合成配音视频”；
+- 后端调用 ffmpeg 将每句录音按字幕时间轴混音并封装到原视频；
+- 返回可下载地址（`/dubbings/render/{render_id}/download`），小程序可直接预览。
+
+## 0 域名、免费、10 分钟真机跑通（Cloudflare Tunnel）
+
+> 适合开发验证，不需要购买域名。会得到一个临时 `https://*.trycloudflare.com` 地址。
+
+### 1) 启动后端（监听所有网卡）
+
+```bash
+cd /workspace
+python3 -m pip install --user -r requirements.txt
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+### 2) 开一个新终端，安装并启动 cloudflared
+
+```bash
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+chmod +x cloudflared
+./cloudflared tunnel --url http://localhost:8000
+```
+
+启动后会看到类似：
+
+`https://xxxx-xxxx.trycloudflare.com`
+
+### 3) 微信开发者工具/真机里配置后端地址
+
+- 进入小程序 `pages/videos/index`
+- 后端地址填：`https://xxxx-xxxx.trycloudflare.com`
+- 点“保存地址” -> “检测连接”
+- 成功后即可真机完整跑通（列表、录音上传、评分、PK、合成视频）
 
 ## 运行测试
 

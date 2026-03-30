@@ -124,6 +124,10 @@
   padding: 0 24rpx;
 }
 
+.render-btn {
+  margin-top: 14rpx;
+}
+
 .result-card {
   margin: 18rpx 24rpx;
   background: #fff;
@@ -135,4 +139,12 @@
   font-size: 30rpx;
   font-weight: 700;
   margin-bottom: 10rpx;
+}
+
+.rendered-video {
+  width: 100%;
+  height: 320rpx;
+  margin-top: 12rpx;
+  border-radius: 12rpx;
+  background: #101114;
 }
