@@ -64,3 +64,38 @@ def test_pk_create_and_join() -> None:
     assert join_response.status_code == 200
     joined = join_response.json()
     assert set(joined["participants"]) == {"u_inviter", "u_friend"}
+
+
+def test_audio_line_upload_returns_mock_transcript_and_score() -> None:
+    response = client.post(
+        "/dubbings/audio-lines/upload",
+        data={
+            "user_id": "u_audio",
+            "video_id": "video_001",
+            "line_id": "l1",
+        },
+        files={"audio_file": ("line1.wav", b"1234567890", "audio/wav")},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["user_id"] == "u_audio"
+    assert payload["video_id"] == "video_001"
+    assert payload["line_id"] == "l1"
+    assert payload["file_name"] == "line1.wav"
+    assert payload["file_size"] == 10
+    assert payload["transcript"]
+    assert 0 <= payload["line_score"] <= 100
+
+
+def test_audio_line_upload_rejects_empty_file() -> None:
+    response = client.post(
+        "/dubbings/audio-lines/upload",
+        data={
+            "user_id": "u_audio",
+            "video_id": "video_001",
+            "line_id": "l1",
+        },
+        files={"audio_file": ("line1.wav", b"", "audio/wav")},
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Audio file is empty"

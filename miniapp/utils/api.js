@@ -22,6 +22,40 @@ function request({ url, method = 'GET', data }) {
   });
 }
 
+function uploadAudioLine({ userId, videoId, lineId, filePath }) {
+  const baseUrl = (app && app.globalData && app.globalData.baseUrl) || '';
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${baseUrl}/dubbings/audio-lines/upload`,
+      filePath,
+      name: 'audio_file',
+      formData: {
+        user_id: userId,
+        video_id: videoId,
+        line_id: lineId
+      },
+      success: (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(JSON.parse(res.data));
+          } catch (error) {
+            reject(new Error('上传成功但返回解析失败'));
+          }
+          return;
+        }
+
+        try {
+          const payload = JSON.parse(res.data);
+          reject(new Error(payload.detail || '上传失败'));
+        } catch (error) {
+          reject(new Error('上传失败'));
+        }
+      },
+      fail: (err) => reject(err)
+    });
+  });
+}
+
 function getVideos() {
   return request({ url: '/videos' });
 }
@@ -63,6 +97,7 @@ module.exports = {
   getVideo,
   getLeaderboard,
   submitDubbing,
+  uploadAudioLine,
   createPkInvitation,
   joinPkInvitation
 };

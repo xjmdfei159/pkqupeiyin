@@ -38,6 +38,7 @@ uvicorn app.main:app --reload
 - `GET /videos`：视频列表
 - `GET /videos/{video_id}`：视频详情（含字幕）
 - `GET /videos/{video_id}/leaderboard`：视频排行榜
+- `POST /dubbings/audio-lines/upload`：上传单句录音，返回模拟 ASR 文本与单句分数
 - `POST /dubbings/submit`：提交配音并评分
 - `POST /pk/invitations`：创建 PK 邀请
 - `POST /pk/invitations/{share_code}/join`：通过分享码加入 PK
@@ -67,9 +68,15 @@ App({
 ### 3) 页面说明
 
 - `pages/videos/index`：视频列表入口
-- `pages/video-detail/index`：配音输入与提交评分、发起 PK 邀请
+- `pages/video-detail/index`：逐句录音上传识别、提交评分、发起 PK 邀请
 - `pages/leaderboard/index`：排行榜
 - `pages/pk-join/index`：通过分享码加入 PK
+
+### 4) 语音模式说明（当前为模拟 ASR）
+
+- 小程序在视频详情页按句录音并上传文件到后端；
+- 后端 `POST /dubbings/audio-lines/upload` 返回该句的模拟转写文本与即时分数；
+- 客户端收集每句识别文本后，再调用 `POST /dubbings/submit` 计算最终总分与排名。
 
 ## 运行测试
 

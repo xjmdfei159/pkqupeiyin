@@ -12,13 +12,25 @@
   <view class="card" wx:for="{{lines}}" wx:key="line_id">
     <view class="line-head">第 {{index + 1}} 句</view>
     <view class="expected">标准词：{{item.expected_text}}</view>
-    <textarea
-      class="input"
-      placeholder="输入该句配音识别文本（MVP模拟）"
-      value="{{item.spoken_text}}"
-      data-line-id="{{item.line_id}}"
-      bindinput="onLineInput"
-    />
+    <view class="line-btn-row">
+      <button
+        size="mini"
+        type="{{recordingLineId === item.line_id ? 'warn' : 'default'}}"
+        data-line-id="{{item.line_id}}"
+        bindtap="startRecord"
+      >
+        {{recordingLineId === item.line_id ? '录音中...' : '开始录音'}}
+      </button>
+      <button size="mini" bindtap="stopRecord">停止录音</button>
+    </view>
+    <view class="line-meta">
+      <text>识别文本：{{item.spoken_text || '尚未识别'}}</text>
+    </view>
+    <view class="line-meta">
+      <text>本句得分：{{item.line_score !== null ? item.line_score : '-'}}</text>
+      <text>状态：{{item.audio_uploaded ? '已上传' : '未上传'}}</text>
+    </view>
+    <view class="line-tip">先点“开始录音”，说完后点“停止录音”自动上传识别</view>
   </view>
 
   <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>

@@ -7,7 +7,7 @@ from threading import Lock
 from typing import Dict, List
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 
@@ -60,6 +60,18 @@ class PkInvitationStore:
     created_at: datetime = field(default_factory=utc_now)
 
 
+@dataclass
+class AudioLineUploadStore:
+    upload_id: str
+    user_id: str
+    video_id: str
+    line_id: str
+    file_name: str
+    file_size: int
+    transcript: str
+    created_at: datetime
+
+
 class DubbingLineSubmission(BaseModel):
     line_id: str
     spoken_text: str = ""
@@ -86,6 +98,7 @@ class InMemoryStore:
         self.attempts: Dict[str, DubbingAttempt] = {}
         self.leaderboard: Dict[tuple[str, str], LeaderboardEntryStore] = {}
         self.invitations: Dict[str, PkInvitationStore] = {}
+        self.audio_line_uploads: Dict[str, AudioLineUploadStore] = {}
         self.lock = Lock()
 
     @staticmethod
@@ -149,6 +162,29 @@ app = FastAPI(
 def compute_line_score(expected_text: str, spoken_text: str) -> float:
     ratio = SequenceMatcher(a=expected_text.strip(), b=spoken_text.strip()).ratio()
     return round(ratio * 100, 2)
+
+
+def get_subtitle_line(video: Video, line_id: str) -> SubtitleLine | None:
+    return next((line for line in video.subtitles if line.line_id == line_id), None)
+
+
+def simulate_asr_transcript(expected_text: str, file_size: int) -> str:
+    """
+    Deterministic ASR mock based on file size, useful for MVP integration.
+    """
+    if not expected_text:
+        return ""
+
+    mode = file_size % 4
+    if mode == 0:
+        return expected_text
+    if mode == 1 and len(expected_text) > 1:
+        return expected_text[:-1]
+    if mode == 2:
+        return f"{expected_text}!"
+    if mode == 3 and len(expected_text) > 2:
+        return f"{expected_text[1:]}{expected_text[0]}"
+    return expected_text
 
 
 def serialize_video(video: Video) -> dict:
@@ -283,6 +319,57 @@ def submit_dubbing(payload: SubmitDubbingRequest) -> dict:
         "total_score": total_score,
         "is_new_personal_best": is_new_personal_best,
         "current_rank": rank,
+        "created_at": created_at.isoformat(),
+    }
+
+
+@app.post("/dubbings/audio-lines/upload")
+async def upload_audio_line(
+    user_id: str = Form(...),
+    video_id: str = Form(...),
+    line_id: str = Form(...),
+    audio_file: UploadFile = File(...),
+) -> dict:
+    video = store.videos.get(video_id)
+    if video is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    subtitle = get_subtitle_line(video, line_id)
+    if subtitle is None:
+        raise HTTPException(status_code=404, detail="Subtitle line not found")
+
+    content = await audio_file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Audio file is empty")
+
+    created_at = utc_now()
+    transcript = simulate_asr_transcript(subtitle.expected_text, len(content))
+    line_score = compute_line_score(subtitle.expected_text, transcript)
+    upload_id = str(uuid4())
+
+    file_name = audio_file.filename or "unknown_audio"
+
+    with store.lock:
+        store.audio_line_uploads[upload_id] = AudioLineUploadStore(
+            upload_id=upload_id,
+            user_id=user_id,
+            video_id=video_id,
+            line_id=line_id,
+            file_name=file_name,
+            file_size=len(content),
+            transcript=transcript,
+            created_at=created_at,
+        )
+
+    return {
+        "upload_id": upload_id,
+        "user_id": user_id,
+        "video_id": video_id,
+        "line_id": line_id,
+        "file_name": file_name,
+        "file_size": len(content),
+        "transcript": transcript,
+        "line_score": line_score,
         "created_at": created_at.isoformat(),
     }
 

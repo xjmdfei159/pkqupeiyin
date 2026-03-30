@@ -97,6 +97,7 @@ MVP 阶段采用文本相似度打分，便于快速上线验证流程：
 
 ### 配音与评分
 
+- `POST /dubbings/audio-lines/upload`：上传单句音频并返回模拟 ASR 文本与单句分数
 - `POST /dubbings/submit`：提交逐句文本并评分，返回总分与是否刷新个人最佳
 
 ### PK 相关
