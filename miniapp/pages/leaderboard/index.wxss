@@ -1,38 +1,43 @@
 .page {
   min-height: 100vh;
-  background: #4b4d56;
-  padding: 60rpx 28rpx 40rpx;
+  background: #f5f5f7;
+  padding: 38rpx 24rpx 32rpx;
   box-sizing: border-box;
 }
 
 .rank-title {
   text-align: center;
-  color: #fff;
-  font-size: 46rpx;
+  color: #1d1d1f;
+  font-size: 44rpx;
   font-weight: 700;
-  margin-bottom: 28rpx;
+  margin-bottom: 20rpx;
+  letter-spacing: 0.4rpx;
 }
 
 .rank-board {
-  background: linear-gradient(180deg, rgba(28, 31, 40, 0.94), rgba(19, 21, 29, 0.96));
-  border: 1rpx solid rgba(255, 255, 255, 0.1);
-  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(60, 60, 67, 0.13);
+  border-radius: 26rpx;
   overflow: hidden;
+  box-shadow:
+    0 10rpx 24rpx rgba(15, 23, 42, 0.08),
+    0 2rpx 5rpx rgba(15, 23, 42, 0.05);
+  margin-bottom: 16rpx;
 }
 
 .board-header {
-  color: #8a93a3;
+  color: #6e6e73;
   font-size: 24rpx;
   padding: 18rpx 22rpx 14rpx;
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.12);
 }
 
 .rank-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 22rpx;
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+  padding: 20rpx 22rpx;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.1);
 }
 
 .rank-row:last-child {
@@ -42,35 +47,35 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 16rpx;
+  gap: 14rpx;
 }
 
 .rank {
   width: 44rpx;
-  color: #f6b02f;
-  font-size: 36rpx;
+  color: #8e8e93;
+  font-size: 34rpx;
   font-weight: 700;
   text-align: center;
 }
 
 .rank-1 {
-  color: #ffcf4a;
+  color: #ff9f0a;
 }
 
 .rank-2 {
-  color: #ffd66d;
+  color: #ffb340;
 }
 
 .rank-3 {
-  color: #ffdf92;
+  color: #ffc870;
 }
 
 .avatar {
-  width: 58rpx;
-  height: 58rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
-  background: #e6e6e6;
-  color: #535862;
+  background: #e5e5ea;
+  color: #3a3a3c;
   font-size: 24rpx;
   display: flex;
   align-items: center;
@@ -78,8 +83,8 @@
 }
 
 .user {
-  color: #eef1f5;
-  font-size: 34rpx;
+  color: #1d1d1f;
+  font-size: 30rpx;
   max-width: 320rpx;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -87,14 +92,14 @@
 }
 
 .score {
-  color: #f6f7f9;
-  font-size: 40rpx;
+  color: #0071e3;
+  font-size: 36rpx;
   font-weight: 700;
 }
 
 .empty,
 .loading {
-  color: #d3d7df;
+  color: #8e8e93;
   text-align: center;
   padding: 36rpx 0;
 }

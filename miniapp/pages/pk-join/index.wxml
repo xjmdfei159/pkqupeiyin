@@ -8,7 +8,7 @@
       bindinput="onInputCode"
       bindblur="onBlurCode"
     />
-    <button type="primary" bindtap="joinPk" loading="{{joining}}">加入</button>
+    <button class="join-btn" type="primary" bindtap="joinPk" loading="{{joining}}">加入</button>
   </view>
 
   <view class="card" wx:if="{{invitationInfo}}">

@@ -8,8 +8,8 @@
       bindinput="onBaseUrlInput"
     />
     <view class="btn-row">
-      <button size="mini" type="primary" bindtap="saveBaseUrl">保存地址</button>
-      <button size="mini" bindtap="testConnection">检测连接</button>
+      <button size="mini" class="btn-primary" type="primary" bindtap="saveBaseUrl">保存地址</button>
+      <button size="mini" class="btn-secondary" bindtap="testConnection">检测连接</button>
     </view>
     <view class="tip">状态：{{healthStatus || '未检测'}}</view>
   </view>
@@ -26,8 +26,8 @@
       <view class="subtitle">{{item.description}}</view>
       <view class="meta">字幕句数：{{item.subtitles.length}}</view>
       <view class="btn-row">
-        <button size="mini" type="primary" data-video-id="{{item.video_id}}" bindtap="goDetail">去配音</button>
-        <button size="mini" data-video-id="{{item.video_id}}" bindtap="goLeaderboard">排行榜</button>
+        <button size="mini" class="btn-primary" type="primary" data-video-id="{{item.video_id}}" bindtap="goDetail">去配音</button>
+        <button size="mini" class="btn-secondary" data-video-id="{{item.video_id}}" bindtap="goLeaderboard">排行榜</button>
       </view>
     </view>
   </block>

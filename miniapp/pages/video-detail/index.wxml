@@ -52,8 +52,8 @@
   </view>
 
   <view class="submit-wrap">
-    <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
-    <button class="render-btn" bindtap="renderVideo" loading="{{rendering}}">合成配音视频</button>
+    <button class="primary-btn" type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
+    <button class="secondary-btn render-btn" bindtap="renderVideo" loading="{{rendering}}">合成配音视频</button>
   </view>
 
   <view class="result-card" wx:if="{{result.attempt_id}}">

@@ -1,7 +1,17 @@
 page {
-  background: #f6f7fb;
-  color: #1f2329;
+  background: #f5f5f7;
+  color: #1d1d1f;
   font-size: 28rpx;
+  line-height: 1.45;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "PingFang SC",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
 .container {
@@ -9,26 +19,31 @@ page {
 }
 
 .card {
-  background: #fff;
-  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
+  border-radius: 26rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8rpx 24rpx rgba(15, 23, 42, 0.08),
+    0 1rpx 2rpx rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(16rpx);
 }
 
 .title {
-  font-size: 34rpx;
-  font-weight: 600;
+  font-size: 36rpx;
+  font-weight: 700;
+  letter-spacing: 0.2rpx;
 }
 
 .subtitle {
   margin-top: 8rpx;
   font-size: 24rpx;
-  color: #5c6370;
+  color: #6e6e73;
 }
 
 .btn-row {
   display: flex;
-  gap: 16rpx;
-  margin-top: 20rpx;
+  gap: 12rpx;
+  margin-top: 18rpx;
 }
