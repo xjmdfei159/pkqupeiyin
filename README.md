@@ -41,6 +41,7 @@ uvicorn app.main:app --reload
 - `POST /dubbings/audio-lines/upload`：上传单句录音，返回模拟 ASR 文本与单句分数
 - `POST /dubbings/submit`：提交配音并评分
 - `POST /pk/invitations`：创建 PK 邀请
+- `GET /pk/invitations/{share_code}`：查询邀请码详情（用于分享落地页展示）
 - `POST /pk/invitations/{share_code}/join`：通过分享码加入 PK
 
 ## 微信小程序前端（MVP）
@@ -77,6 +78,12 @@ App({
 - 小程序在视频详情页按句录音并上传文件到后端；
 - 后端 `POST /dubbings/audio-lines/upload` 返回该句的模拟转写文本与即时分数；
 - 客户端收集每句识别文本后，再调用 `POST /dubbings/submit` 计算最终总分与排名。
+
+### 5) 分享与 PK 邀请
+
+- 在配音页点击“发起PK”可生成分享码；
+- 点击“分享PK”可使用微信原生转发，把挑战发给好友或群；
+- 被分享者打开后进入 `pages/pk-join/index?shareCode=...`，可直接查看邀请并加入 PK。
 
 ## 运行测试
 

@@ -1,59 +1,64 @@
-<view class="container">
-  <view class="card" wx:if="{{video.video_id}}">
-    <view class="title">{{video.title}}</view>
-    <view class="subtitle">{{video.description}}</view>
-    <view class="video-id">video_id: {{video.video_id}}</view>
-    <view class="btn-row">
-      <button size="mini" bindtap="goLeaderboard">看排行榜</button>
-      <button size="mini" type="primary" bindtap="createInvitation">发起PK邀请</button>
+<view class="page">
+  <view class="video-section" wx:if="{{video.video_id}}">
+    <video
+      class="video-player"
+      src="{{video.demo_video_url || ''}}"
+      controls
+      poster="{{video.poster_url || ''}}"
+      objectFit="cover"
+      autoplay="{{false}}"
+    />
+    <view class="video-mask">
+      <view class="video-title">{{video.title}}</view>
+      <view class="video-desc">{{video.description}}</view>
     </view>
   </view>
 
-  <view class="card" wx:for="{{lines}}" wx:key="line_id">
-    <view class="line-head">第 {{index + 1}} 句</view>
-    <view class="expected">标准词：{{item.expected_text}}</view>
-    <view class="line-btn-row">
-      <button
-        size="mini"
-        type="{{recordingLineId === item.line_id ? 'warn' : 'default'}}"
-        data-line-id="{{item.line_id}}"
-        bindtap="startRecord"
-      >
-        {{recordingLineId === item.line_id ? '录音中...' : '开始录音'}}
-      </button>
-      <button size="mini" bindtap="stopRecord">停止录音</button>
-    </view>
-    <view class="line-meta">
-      <text>识别文本：{{item.spoken_text || '尚未识别'}}</text>
-    </view>
-    <view class="line-meta">
-      <text>本句得分：{{item.line_score !== null ? item.line_score : '-'}}</text>
-      <text>状态：{{item.audio_uploaded ? '已上传' : '未上传'}}</text>
-    </view>
-    <view class="line-tip">先点“开始录音”，说完后点“停止录音”自动上传识别</view>
+  <view class="action-bar">
+    <button size="mini" class="ghost-btn" bindtap="goLeaderboard">排行榜</button>
+    <button size="mini" class="ghost-btn" type="primary" bindtap="createInvitation">发起PK</button>
+    <button
+      wx:if="{{invite.share_code}}"
+      size="mini"
+      class="ghost-btn"
+      open-type="share"
+    >
+      分享PK
+    </button>
   </view>
 
-  <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
-
-  <view class="card" wx:if="{{result.attempt_id}}">
-    <view class="result-title">本次结果</view>
-    <view>总分：{{result.total_score}}</view>
-    <view>当前排名：{{result.current_rank || '-'}}</view>
-    <view>是否刷新个人最佳：{{result.is_new_personal_best ? '是' : '否'}}</view>
-
-    <view class="line-score-title">逐句得分</view>
-    <block wx:for="{{result.line_results}}" wx:key="line_id">
-      <view class="line-score-row">
-        <text>{{item.line_id}}：</text>
-        <text>{{item.score}}</text>
+  <view class="subtitle-panel">
+    <view class="panel-header">字幕配音（{{lines.length}}句）</view>
+    <block wx:for="{{lines}}" wx:key="line_id">
+      <view class="line-item">
+        <view class="line-main">
+          <view class="line-index">{{index + 1}}/{{lines.length}}</view>
+          <view class="line-text">{{item.expected_text}}</view>
+          <view class="line-transcript">{{item.spoken_text || '点击右侧麦克风开始本句录音'}}</view>
+          <view class="line-meta">
+            <text>分数：{{item.line_score !== null ? item.line_score : '-'}}</text>
+            <text>{{item.audio_uploaded ? '已上传' : '未上传'}}</text>
+          </view>
+        </view>
+        <view
+          class="mic-btn {{recordingLineId === item.line_id ? 'mic-btn-recording' : ''}}"
+          data-line-id="{{item.line_id}}"
+          bindtap="toggleRecord"
+        >
+          <text class="mic-icon">{{recordingLineId === item.line_id ? '■' : '🎤'}}</text>
+        </view>
       </view>
     </block>
   </view>
 
-  <view class="card" wx:if="{{invite.share_code}}">
-    <view class="result-title">PK邀请已创建</view>
-    <view>分享码：{{invite.share_code}}</view>
-    <view>参与者：{{invite.participants.join('、')}}</view>
-    <view class="tip">可让好友打开：/pages/pk-join/index?shareCode={{invite.share_code}}</view>
+  <view class="submit-wrap">
+    <button type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
+  </view>
+
+  <view class="result-card" wx:if="{{result.attempt_id}}">
+    <view class="result-title">本次结果</view>
+    <view>总分：{{result.total_score}}</view>
+    <view>当前排名：{{result.current_rank || '-'}}</view>
+    <view>是否刷新个人最佳：{{result.is_new_personal_best ? '是' : '否'}}</view>
   </view>
 </view>

@@ -6,8 +6,16 @@
       placeholder="输入分享码"
       value="{{shareCode}}"
       bindinput="onInputCode"
+      bindblur="onBlurCode"
     />
     <button type="primary" bindtap="joinPk" loading="{{joining}}">加入</button>
+  </view>
+
+  <view class="card" wx:if="{{invitationInfo}}">
+    <view class="result-title">邀请信息</view>
+    <view>视频ID：{{invitationInfo.video_id}}</view>
+    <view>发起人：{{invitationInfo.inviter_user_id}}</view>
+    <view>当前参与人数：{{invitationInfo.participants.length}}</view>
   </view>
 
   <view class="card" wx:if="{{joined.invitation_id}}">

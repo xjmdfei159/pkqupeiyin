@@ -19,6 +19,10 @@ Page({
       videoId: options.videoId || '',
       userId: getOrCreateUserId()
     });
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    });
     this.initRecorder();
     if (this.data.videoId) {
       this.fetchVideo();
@@ -67,16 +71,17 @@ Page({
     }
   },
 
-  onLineInput(e) {
+  toggleRecord(e) {
     const { lineId } = e.currentTarget.dataset;
-    const value = e.detail.value;
-    const lines = this.data.lines.map((line) => {
-      if (line.line_id === lineId) {
-        return { ...line, spoken_text: value };
-      }
-      return line;
-    });
-    this.setData({ lines });
+    if (this.data.recordingLineId === lineId) {
+      this.stopRecord();
+      return;
+    }
+    if (this.data.recordingLineId) {
+      wx.showToast({ title: '请先结束当前录音', icon: 'none' });
+      return;
+    }
+    this.startRecord(e);
   },
 
   startRecord(e) {
@@ -85,10 +90,6 @@ Page({
       return;
     }
     const { lineId } = e.currentTarget.dataset;
-    if (this.data.recordingLineId) {
-      wx.showToast({ title: '正在录音中', icon: 'none' });
-      return;
-    }
 
     this.setData({ recordingLineId: lineId });
     this.recorderManager.start({
@@ -172,10 +173,31 @@ Page({
         video_id: this.data.videoId
       });
       this.setData({ invite });
-      wx.showToast({ title: '已生成邀请码', icon: 'success' });
+      wx.setClipboardData({ data: invite.share_code });
+      wx.showToast({ title: '邀请码已复制，可直接分享', icon: 'none' });
     } catch (error) {
       wx.showToast({ title: error.message || '创建失败', icon: 'none' });
     }
+  },
+
+  onShareAppMessage() {
+    const shareCode = this.data.invite.share_code;
+    if (!shareCode) {
+      return {
+        title: `来和我挑战「${this.data.video.title || '配音PK'}」`,
+        path: `/pages/video-detail/index?videoId=${this.data.videoId}`
+      };
+    }
+    return {
+      title: `来参加我的配音PK：${this.data.video.title || this.data.videoId}`,
+      path: `/pages/pk-join/index?shareCode=${shareCode}`
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: `配音PK挑战：${this.data.video.title || this.data.videoId}`
+    };
   },
 
   goLeaderboard() {

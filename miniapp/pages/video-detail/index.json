@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "视频配音"
+  "navigationBarTitleText": "视频配音",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

@@ -28,6 +28,8 @@ class Video:
     video_id: str
     title: str
     description: str
+    demo_video_url: str
+    poster_url: str
     subtitles: List[SubtitleLine]
 
 
@@ -108,6 +110,8 @@ class InMemoryStore:
                 video_id="video_001",
                 title="经典对白：逆风翻盘",
                 description="两人对话情绪起伏较大，适合练习表达。",
+                demo_video_url="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+                poster_url="https://dummyimage.com/640x360/222/fff&text=video_001",
                 subtitles=[
                     SubtitleLine(
                         line_id="l1",
@@ -133,6 +137,8 @@ class InMemoryStore:
                 video_id="video_002",
                 title="轻喜剧：下班前一分钟",
                 description="语速快，适合挑战节奏和停顿。",
+                demo_video_url="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+                poster_url="https://dummyimage.com/640x360/111/fff&text=video_002",
                 subtitles=[
                     SubtitleLine(
                         line_id="l1",
@@ -192,6 +198,8 @@ def serialize_video(video: Video) -> dict:
         "video_id": video.video_id,
         "title": video.title,
         "description": video.description,
+        "demo_video_url": video.demo_video_url,
+        "poster_url": video.poster_url,
         "subtitles": [
             {
                 "line_id": line.line_id,
@@ -211,6 +219,17 @@ def serialize_leaderboard_entry(entry: LeaderboardEntryStore) -> dict:
         "best_score": entry.best_score,
         "best_attempt_id": entry.best_attempt_id,
         "updated_at": entry.updated_at.isoformat(),
+    }
+
+
+def serialize_invitation(invitation: PkInvitationStore) -> dict:
+    return {
+        "invitation_id": invitation.invitation_id,
+        "video_id": invitation.video_id,
+        "inviter_user_id": invitation.inviter_user_id,
+        "share_code": invitation.share_code,
+        "participants": invitation.participants,
+        "created_at": invitation.created_at.isoformat(),
     }
 
 
@@ -391,19 +410,22 @@ def create_pk_invitation(payload: CreateInvitationRequest) -> dict:
     with store.lock:
         store.invitations[share_code] = invitation
 
-    return {
-        "invitation_id": invitation.invitation_id,
-        "video_id": invitation.video_id,
-        "inviter_user_id": invitation.inviter_user_id,
-        "share_code": invitation.share_code,
-        "participants": invitation.participants,
-        "created_at": invitation.created_at.isoformat(),
-    }
+    return serialize_invitation(invitation)
+
+
+@app.get("/pk/invitations/{share_code}")
+def get_pk_invitation(share_code: str) -> dict:
+    normalized_share_code = share_code.strip().upper()
+    invitation = store.invitations.get(normalized_share_code)
+    if invitation is None:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+    return serialize_invitation(invitation)
 
 
 @app.post("/pk/invitations/{share_code}/join")
 def join_pk_invitation(share_code: str, payload: JoinInvitationRequest) -> dict:
-    invitation = store.invitations.get(share_code)
+    normalized_share_code = share_code.strip().upper()
+    invitation = store.invitations.get(normalized_share_code)
     if invitation is None:
         raise HTTPException(status_code=404, detail="Invitation not found")
 

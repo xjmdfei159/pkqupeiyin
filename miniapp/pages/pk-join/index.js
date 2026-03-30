@@ -6,7 +6,9 @@ Page({
     userId: '',
     shareCode: '',
     joining: false,
-    joined: {}
+    joined: {},
+    invitationInfo: null,
+    loadingInvitation: false
   },
 
   onLoad(options) {
@@ -14,10 +16,32 @@ Page({
       userId: getOrCreateUserId(),
       shareCode: options.shareCode || ''
     });
+    if (this.data.shareCode) {
+      this.fetchInvitationInfo();
+    }
   },
 
   onInputCode(e) {
     this.setData({ shareCode: (e.detail.value || '').trim().toUpperCase() });
+  },
+
+  onBlurCode() {
+    this.fetchInvitationInfo();
+  },
+
+  async fetchInvitationInfo() {
+    if (!this.data.shareCode) {
+      return;
+    }
+    this.setData({ loadingInvitation: true });
+    try {
+      const invitationInfo = await api.getPkInvitation(this.data.shareCode);
+      this.setData({ invitationInfo });
+    } catch (error) {
+      wx.showToast({ title: error.message || '邀请码无效', icon: 'none' });
+    } finally {
+      this.setData({ loadingInvitation: false });
+    }
   },
 
   async joinPk() {

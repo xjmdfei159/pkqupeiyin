@@ -66,6 +66,22 @@ def test_pk_create_and_join() -> None:
     assert set(joined["participants"]) == {"u_inviter", "u_friend"}
 
 
+def test_pk_invitation_query_is_case_insensitive() -> None:
+    create_response = client.post(
+        "/pk/invitations",
+        json={"user_id": "u_case", "video_id": "video_001"},
+    )
+    assert create_response.status_code == 200
+    invitation = create_response.json()
+    lower_code = invitation["share_code"].lower()
+
+    get_response = client.get(f"/pk/invitations/{lower_code}")
+    assert get_response.status_code == 200
+    queried = get_response.json()
+    assert queried["share_code"] == invitation["share_code"]
+    assert queried["video_id"] == "video_001"
+
+
 def test_audio_line_upload_returns_mock_transcript_and_score() -> None:
     response = client.post(
         "/dubbings/audio-lines/upload",

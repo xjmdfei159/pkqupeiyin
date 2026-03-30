@@ -92,6 +92,12 @@ function joinPkInvitation(shareCode, payload) {
   });
 }
 
+function getPkInvitation(shareCode) {
+  return request({
+    url: `/pk/invitations/${shareCode}`
+  });
+}
+
 module.exports = {
   getVideos,
   getVideo,
@@ -99,5 +105,6 @@ module.exports = {
   submitDubbing,
   uploadAudioLine,
   createPkInvitation,
+  getPkInvitation,
   joinPkInvitation
 };
