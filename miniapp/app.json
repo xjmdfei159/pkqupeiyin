@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/videos/index",
+    "pages/video-detail/index",
+    "pages/leaderboard/index",
+    "pages/pk-join/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "配音PK",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

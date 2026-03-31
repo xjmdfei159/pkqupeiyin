@@ -1,0 +1,28 @@
+.code-input {
+  margin: 18rpx 0;
+  min-height: 84rpx;
+  line-height: 84rpx;
+  padding: 0 18rpx;
+  border-radius: 18rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.15);
+  background: rgba(242, 242, 247, 0.95);
+  color: #1d1d1f;
+  font-size: 26rpx;
+}
+
+.result-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+  color: #1d1d1f;
+}
+
+.join-btn {
+  height: 82rpx;
+  line-height: 82rpx;
+  border-radius: 18rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  background: #0071e3;
+  border: 0;
+}

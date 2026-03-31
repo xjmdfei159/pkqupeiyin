@@ -1,0 +1,71 @@
+<view class="page">
+  <view class="video-section" wx:if="{{video.video_id}}">
+    <video
+      class="video-player"
+      src="{{video.demo_video_url || ''}}"
+      controls
+      poster="{{video.poster_url || ''}}"
+      objectFit="cover"
+      autoplay="{{false}}"
+    />
+    <view class="video-mask">
+      <view class="video-title">{{video.title}}</view>
+      <view class="video-desc">{{video.description}}</view>
+    </view>
+  </view>
+
+  <view class="action-bar">
+    <button size="mini" class="ghost-btn" bindtap="goLeaderboard">排行榜</button>
+    <button size="mini" class="ghost-btn" type="primary" bindtap="createInvitation">发起PK</button>
+    <button
+      wx:if="{{invite.share_code}}"
+      size="mini"
+      class="ghost-btn"
+      open-type="share"
+    >
+      分享PK
+    </button>
+  </view>
+
+  <view class="subtitle-panel">
+    <view class="panel-header">字幕配音（{{lines.length}}句）</view>
+    <block wx:for="{{lines}}" wx:key="line_id">
+      <view class="line-item">
+        <view class="line-main">
+          <view class="line-index">{{index + 1}}/{{lines.length}}</view>
+          <view class="line-text">{{item.expected_text}}</view>
+          <view class="line-transcript">{{item.spoken_text || '点击右侧麦克风开始本句录音'}}</view>
+          <view class="line-meta">
+            <text>分数：{{item.line_score !== null ? item.line_score : '-'}}</text>
+            <text>{{item.audio_uploaded ? '已上传' : '未上传'}}</text>
+          </view>
+        </view>
+        <view
+          class="mic-btn {{recordingLineId === item.line_id ? 'mic-btn-recording' : ''}}"
+          data-line-id="{{item.line_id}}"
+          bindtap="toggleRecord"
+        >
+          <text class="mic-icon">{{recordingLineId === item.line_id ? '■' : '🎤'}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="submit-wrap">
+    <button class="primary-btn" type="primary" bindtap="submitDubbing" loading="{{submitting}}">提交评分</button>
+    <button class="secondary-btn render-btn" bindtap="renderVideo" loading="{{rendering}}">合成配音视频</button>
+  </view>
+
+  <view class="result-card" wx:if="{{result.attempt_id}}">
+    <view class="result-title">本次结果</view>
+    <view>总分：{{result.total_score}}</view>
+    <view>当前排名：{{result.current_rank || '-'}}</view>
+    <view>是否刷新个人最佳：{{result.is_new_personal_best ? '是' : '否'}}</view>
+  </view>
+
+  <view class="result-card" wx:if="{{renderedVideoUrl}}">
+    <view class="result-title">合成视频预览</view>
+    <video class="rendered-video" src="{{renderedVideoUrl}}" controls></video>
+    <view class="line-transcript">下载链接：{{renderedVideoUrl}}</view>
+  </view>
+</view>

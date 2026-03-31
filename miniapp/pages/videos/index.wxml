@@ -1,0 +1,63 @@
+<view class="container">
+  <view class="card config-box">
+    <view class="label">后端地址（真机需 HTTPS 公网地址）</view>
+    <input
+      class="base-url-input"
+      placeholder="例如 https://your-api.example.com"
+      value="{{baseUrlInput}}"
+      bindinput="onBaseUrlInput"
+    />
+    <view class="btn-row">
+      <button size="mini" class="btn-primary" type="primary" bindtap="saveBaseUrl">保存地址</button>
+      <button size="mini" class="btn-secondary" bindtap="testConnection">检测连接</button>
+    </view>
+    <view class="btn-row">
+      <button
+        size="mini"
+        class="btn-secondary"
+        bindtap="runDiagnostics"
+        loading="{{diagnostics.running}}"
+      >
+        一键网络诊断
+      </button>
+    </view>
+    <view class="tip">状态：{{healthStatus || '未检测'}}</view>
+  </view>
+
+  <view class="card diagnostics-box">
+    <view class="label">网络诊断面板</view>
+    <view class="tip">最近检测：{{diagnostics.lastRunAt || '未运行'}}</view>
+    <view class="diag-row diag-{{diagnostics.request.status}}">
+      <view class="diag-name">request</view>
+      <view class="diag-message">{{diagnostics.request.message}}</view>
+    </view>
+    <view class="diag-row diag-{{diagnostics.upload.status}}">
+      <view class="diag-name">uploadFile</view>
+      <view class="diag-message">{{diagnostics.upload.message}}</view>
+    </view>
+    <view class="diag-row diag-{{diagnostics.download.status}}">
+      <view class="diag-name">downloadFile</view>
+      <view class="diag-message">{{diagnostics.download.message}}</view>
+    </view>
+  </view>
+
+  <view class="card user-box">
+    <view class="label">当前用户ID</view>
+    <view class="user-id">{{userId}}</view>
+    <view class="tip">可在 utils/user.js 调整用户生成逻辑</view>
+  </view>
+
+  <block wx:for="{{videos}}" wx:key="video_id">
+    <view class="card">
+      <view class="title">{{item.title}}</view>
+      <view class="subtitle">{{item.description}}</view>
+      <view class="meta">字幕句数：{{item.subtitles.length}}</view>
+      <view class="btn-row">
+        <button size="mini" class="btn-primary" type="primary" data-video-id="{{item.video_id}}" bindtap="goDetail">去配音</button>
+        <button size="mini" class="btn-secondary" data-video-id="{{item.video_id}}" bindtap="goLeaderboard">排行榜</button>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+</view>

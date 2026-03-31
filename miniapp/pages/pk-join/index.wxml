@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="card">
+    <view class="title">通过分享码加入PK</view>
+    <input
+      class="code-input"
+      placeholder="输入分享码"
+      value="{{shareCode}}"
+      bindinput="onInputCode"
+      bindblur="onBlurCode"
+    />
+    <button class="join-btn" type="primary" bindtap="joinPk" loading="{{joining}}">加入</button>
+  </view>
+
+  <view class="card" wx:if="{{invitationInfo}}">
+    <view class="result-title">邀请信息</view>
+    <view>视频ID：{{invitationInfo.video_id}}</view>
+    <view>发起人：{{invitationInfo.inviter_user_id}}</view>
+    <view>当前参与人数：{{invitationInfo.participants.length}}</view>
+  </view>
+
+  <view class="card" wx:if="{{joined.invitation_id}}">
+    <view class="result-title">加入成功</view>
+    <view>视频ID：{{joined.video_id}}</view>
+    <view>分享码：{{joined.share_code}}</view>
+    <view>参与者：{{joined.participants.join('、')}}</view>
+    <view class="btn-row">
+      <button size="mini" type="primary" bindtap="goVideo">去挑战</button>
+    </view>
+  </view>
+</view>

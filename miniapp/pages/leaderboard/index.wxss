@@ -1,0 +1,105 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f7;
+  padding: 38rpx 24rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.rank-title {
+  text-align: center;
+  color: #1d1d1f;
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-bottom: 20rpx;
+  letter-spacing: 0.4rpx;
+}
+
+.rank-board {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1rpx solid rgba(60, 60, 67, 0.13);
+  border-radius: 26rpx;
+  overflow: hidden;
+  box-shadow:
+    0 10rpx 24rpx rgba(15, 23, 42, 0.08),
+    0 2rpx 5rpx rgba(15, 23, 42, 0.05);
+  margin-bottom: 16rpx;
+}
+
+.board-header {
+  color: #6e6e73;
+  font-size: 24rpx;
+  padding: 18rpx 22rpx 14rpx;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.12);
+}
+
+.rank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 22rpx;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.1);
+}
+
+.rank-row:last-child {
+  border-bottom: 0;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.rank {
+  width: 44rpx;
+  color: #8e8e93;
+  font-size: 34rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.rank-1 {
+  color: #ff9f0a;
+}
+
+.rank-2 {
+  color: #ffb340;
+}
+
+.rank-3 {
+  color: #ffc870;
+}
+
+.avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #e5e5ea;
+  color: #3a3a3c;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user {
+  color: #1d1d1f;
+  font-size: 30rpx;
+  max-width: 320rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  color: #0071e3;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.empty,
+.loading {
+  color: #8e8e93;
+  text-align: center;
+  padding: 36rpx 0;
+}

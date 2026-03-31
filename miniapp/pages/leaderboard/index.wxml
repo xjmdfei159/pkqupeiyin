@@ -1,0 +1,31 @@
+<view class="page">
+  <view class="rank-title">好友排行榜</view>
+
+  <view class="rank-board">
+    <view class="board-header">视频 {{videoId}} · 每周一凌晨刷新</view>
+    <block wx:for="{{items}}" wx:key="user_id">
+      <view class="rank-row">
+        <view class="left">
+          <view class="rank rank-{{index + 1}}">{{index + 1}}</view>
+          <view class="avatar">{{item.avatar_label}}</view>
+          <view class="user">{{item.user_id}}</view>
+        </view>
+        <view class="score">{{item.best_score}}</view>
+      </view>
+    </block>
+    <view wx:if="{{!items.length && !loading}}" class="empty">暂无数据，去试试配音吧</view>
+    <view wx:if="{{loading}}" class="loading">加载中...</view>
+  </view>
+
+  <view class="rank-board" wx:if="{{myEntry}}">
+    <view class="board-header">我的排名</view>
+    <view class="rank-row">
+      <view class="left">
+        <view class="rank">{{myRank}}</view>
+        <view class="avatar">{{myEntry.avatar_label}}</view>
+        <view class="user">{{myEntry.user_id}}</view>
+      </view>
+      <view class="score">{{myEntry.best_score}}</view>
+    </view>
+  </view>
+</view>
