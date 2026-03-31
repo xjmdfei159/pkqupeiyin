@@ -121,6 +121,31 @@ chmod +x cloudflared
 - 点“保存地址” -> “检测连接”
 - 成功后即可真机完整跑通（列表、录音上传、评分、PK、合成视频）
 
+## 固定免费域名方案（Render）
+
+仓库已内置部署文件：
+
+- `Dockerfile`（包含 ffmpeg，支持配音视频合成）
+- `render.yaml`（Render Blueprint）
+- `.dockerignore`（减少构建上下文）
+
+### 一键部署步骤
+
+1. 打开 [render.com](https://render.com) 并登录；
+2. 选择 **New +** -> **Blueprint**；
+3. 连接你的 GitHub 仓库并选择本仓库；
+4. Render 会识别 `render.yaml`，确认创建服务；
+5. 部署完成后得到固定域名，例如：`https://pkqupeiyin-api.onrender.com`；
+6. 在小程序 `pages/videos/index` 中填入该地址并“保存地址 + 检测连接”。
+
+### 微信小程序后台域名配置
+
+将 Render 域名加入：
+
+- request 合法域名
+- uploadFile 合法域名
+- downloadFile 合法域名
+
 ## 运行测试
 
 ```bash
