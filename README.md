@@ -65,6 +65,9 @@ uvicorn app.main:app --reload
 > 真机调试必须使用 **公网可访问 HTTPS 地址**，`http://127.0.0.1:8000` 在手机上不可达。  
 > 同时请在微信公众平台的小程序后台把该域名加入 **request/uploadFile 合法域名**。
 
+> 诊断建议：在 `pages/videos/index` 点击“**一键网络诊断**”，可分别检测  
+> `request` / `uploadFile` / `downloadFile` 三条链路，快速定位具体失败项。
+
 ### 3) 页面说明
 
 - `pages/videos/index`：视频列表入口

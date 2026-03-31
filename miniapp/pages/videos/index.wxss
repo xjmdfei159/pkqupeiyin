@@ -15,6 +15,39 @@
   color: #1d1d1f;
 }
 
+.diagnostics-box .label {
+  color: #6e6e73;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.diag-row {
+  margin-top: 10rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 14rpx;
+  background: rgba(242, 242, 247, 0.95);
+}
+
+.diag-name {
+  font-size: 24rpx;
+  color: #3a3a3c;
+}
+
+.diag-message {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #6e6e73;
+  word-break: break-all;
+}
+
+.diag-success .diag-message {
+  color: #16a34a;
+}
+
+.diag-failed .diag-message {
+  color: #ef4444;
+}
+
 .user-box .user-id {
   margin-top: 10rpx;
   font-size: 27rpx;
